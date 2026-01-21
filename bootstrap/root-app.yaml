@@ -11,10 +11,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mizrahi-root
+  name: bank-root-app
   namespace: argocd
   labels:
-    app: mizrahi-root
+    app: bank-root-app
     pattern: app-of-apps
   annotations:
     argocd.argoproj.io/sync-wave: "0"
