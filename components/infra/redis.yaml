@@ -1,0 +1,103 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: mizrahi-core
+  labels:
+    app: redis
+    component: infrastructure
+    managed-by: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      # OpenShift security context - non-root
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: redis
+        image: redis:7.2-alpine
+        imagePullPolicy: IfNotPresent
+        # Run as non-root user
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        ports:
+        - name: redis
+          containerPort: 6379
+          protocol: TCP
+        env:
+        - name: REDIS_PASSWORD
+          value: ""  # For dev/test - use Secret in production
+        command:
+          - redis-server
+          - --appendonly
+          - "yes"
+          - --appendfsync
+          - "everysec"
+          - --maxmemory
+          - "256mb"
+          - --maxmemory-policy
+          - "allkeys-lru"
+        livenessProbe:
+          tcpSocket:
+            port: redis
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+              - redis-cli
+              - ping
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 200m
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        emptyDir: {}  # Ephemeral for dev - use PVC for production
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: mizrahi-core
+  labels:
+    app: redis
+    component: infrastructure
+    managed-by: argocd
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: redis
+    protocol: TCP
+    name: redis
+  selector:
+    app: redis

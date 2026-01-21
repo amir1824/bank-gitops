@@ -1,0 +1,52 @@
+# .gitignore for Mizrahi Bank GitOps Repository
+
+# Helm
+*.tgz
+charts/*/charts/
+.helmignore
+
+# ArgoCD
+.argocd-source-*.yaml
+
+# Kubernetes
+*.kubeconfig
+kubeconfig
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment files
+.env
+*.env
+secrets/
+*.secret
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Logs
+*.log
+logs/
+
+# Testing
+test-output/
+coverage/

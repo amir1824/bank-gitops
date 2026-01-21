@@ -1,0 +1,36 @@
+# Global configuration for Mizrahi Bank GitOps
+# This file controls which applications are deployed via the App-of-Apps pattern
+
+global:
+  # Git repository configuration
+  repoURL: https://github.com/amir1824/bank-gitops.git
+  targetRevision: main
+  
+  # ArgoCD configuration
+  argocdNamespace: argocd
+  destinationServer: https://kubernetes.default.svc
+  
+  # Sync policy defaults
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+
+# Infrastructure layer toggles
+infrastructure:
+  enabled: true
+  namespace: mizrahi-core
+  kafka:
+    enabled: true
+  redis:
+    enabled: true
+
+# Applications layer toggles  
+apps:
+  enabled: true
+  namespace: mizrahi-core
+  mainframeMock:
+    enabled: true
