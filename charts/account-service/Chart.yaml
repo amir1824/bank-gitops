@@ -1,0 +1,21 @@
+apiVersion: v2
+name: account-service
+description: |
+  Mizrahi Bank - Account Service (.NET Core)
+  
+  RESTful API service for managing customer accounts, transactions, and balance inquiries.
+  Built with .NET 8 and designed for OpenShift deployment with proper security contexts.
+
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - dotnet
+  - account
+  - banking
+  - openshift
+
+maintainers:
+  - name: Mizrahi Bank DevOps Team
+    email: devops@mizrahi.bank

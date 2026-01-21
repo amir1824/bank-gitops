@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "account-service.fullname" . }}
+  labels:
+    {{- include "account-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "account-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "account-service.selectorLabels" . | nindent 8 }}
+    spec:
+      # OpenShift security context - MUST run as user 1001 (non-root)
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        # Security context for container - non-root user 1001
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.targetPort }}
+          protocol: TCP
+        env:
+        # ASP.NET Core configuration
+        - name: ASPNETCORE_ENVIRONMENT
+          value: {{ .Values.config.environment | quote }}
+        - name: ASPNETCORE_URLS
+          value: {{ .Values.config.aspNetCoreUrls | quote }}
+        # Kafka configuration
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "account-service.fullname" . }}-config
+              key: kafka.bootstrapServers
+        - name: KAFKA_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "account-service.fullname" . }}-config
+              key: kafka.topic
+        # Redis configuration
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "account-service.fullname" . }}-config
+              key: redis.host
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "account-service.fullname" . }}-config
+              key: redis.port
+        # Database connection (use Secret in production)
+        - name: DATABASE_CONNECTION_STRING
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "account-service.fullname" . }}-config
+              key: database.connectionString
+        # Liveness probe - checks if app is running
+        livenessProbe:
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
+        # Readiness probe - checks if app is ready for traffic
+        readinessProbe:
+          {{- toYaml .Values.readinessProbe | nindent 10 }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

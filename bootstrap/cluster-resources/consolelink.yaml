@@ -1,0 +1,26 @@
+---
+# OpenShift Console Link to ArgoCD
+# Adds a convenient link in the OpenShift web console to access ArgoCD UI
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: argocd-console-link
+spec:
+  href: https://argocd-server-argocd.apps.ocp.mizrahi.local
+  location: ApplicationMenu
+  text: ArgoCD - GitOps Dashboard
+  applicationMenu:
+    section: DevOps Tools
+    imageURL: data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMEMzLjU4IDAgMCAzLjU4IDAgOGMwIDQuNDIgMy41OCA4IDggOHM4LTMuNTggOC04QzE2IDMuNTggMTIuNDIgMCA4IDB6bTAgMTRjLTMuMzEgMC02LTIuNjktNi02czIuNjktNiA2LTYgNiAyLjY5IDYgNi0yLjY5IDYtNiA2eiIgZmlsbD0iI0VGNzAyMyIvPgo8L3N2Zz4=
+---
+# OpenShift Console Notification Banner
+# Optional: Display a banner to inform users about GitOps deployment
+apiVersion: console.openshift.io/v1
+kind: ConsoleNotification
+metadata:
+  name: mizrahi-gitops-banner
+spec:
+  text: 'Mizrahi Bank is managed via GitOps (ArgoCD). All changes must go through Git.'
+  location: BannerTop
+  color: '#0066CC'
+  backgroundColor: '#E7F3FF'

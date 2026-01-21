@@ -1,0 +1,41 @@
+{{- if .Values.applications.accountService.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-account-service
+  namespace: {{ .Values.global.argocdNamespace }}
+  labels:
+    {{- include "mizrahi-apps.labels" . | nindent 4 }}
+    component: application
+    service: account-service
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.applications.accountService.syncWave }}"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: {{ .Values.global.repoURL }}
+    targetRevision: {{ .Values.global.targetRevision }}
+    path: {{ .Values.applications.accountService.path }}
+    helm:
+      releaseName: {{ .Values.applications.accountService.helm.releaseName }}
+      values: |
+        {{- toYaml .Values.applications.accountService.helm.values | nindent 8 }}
+  
+  destination:
+    server: {{ .Values.global.destinationServer }}
+    namespace: {{ .Values.applications.accountService.namespace | default .Values.global.namespace }}
+  
+  syncPolicy:
+    {{- include "mizrahi-apps.syncPolicy" . | nindent 4 }}
+  
+  # OpenShift Route ignore rules
+  ignoreDifferences:
+    - group: route.openshift.io
+      kind: Route
+      jsonPointers:
+        - /status/ingress
+{{- end }}

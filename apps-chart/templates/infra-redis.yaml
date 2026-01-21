@@ -1,0 +1,32 @@
+{{- if .Values.infrastructure.redis.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra-redis
+  namespace: {{ .Values.global.argocdNamespace }}
+  labels:
+    {{- include "mizrahi-apps.labels" . | nindent 4 }}
+    component: infrastructure
+    service: redis
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.infrastructure.redis.syncWave }}"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: {{ .Values.global.repoURL }}
+    targetRevision: {{ .Values.global.targetRevision }}
+    path: {{ .Values.infrastructure.redis.path }}
+    directory:
+      recurse: true
+  
+  destination:
+    server: {{ .Values.global.destinationServer }}
+    namespace: {{ .Values.infrastructure.redis.namespace | default .Values.global.namespace }}
+  
+  syncPolicy:
+    {{- include "mizrahi-apps.syncPolicy" . | nindent 4 }}
+{{- end }}

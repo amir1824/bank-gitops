@@ -30,8 +30,9 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-# OpenShift security context - non-root user
+# OpenShift security context - MUST run as user 1001 (non-root)
 securityContext:
+  runAsUser: 1001
   runAsNonRoot: true
   allowPrivilegeEscalation: false
   capabilities:
@@ -41,7 +42,9 @@ securityContext:
     type: RuntimeDefault
 
 podSecurityContext:
+  runAsUser: 1001
   runAsNonRoot: true
+  fsGroup: 1001
   seccompProfile:
     type: RuntimeDefault
 

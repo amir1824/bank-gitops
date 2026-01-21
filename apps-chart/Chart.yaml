@@ -1,0 +1,28 @@
+apiVersion: v2
+name: mizrahi-apps
+description: |
+  Mizrahi Bank - App of Apps Helm Chart
+  
+  This Helm chart generates ArgoCD Application manifests for all infrastructure
+  components and applications in the Mizrahi Bank platform. It follows the 
+  "App of Apps" pattern where one root application manages multiple child applications.
+  
+  Components managed:
+  - Infrastructure: Kafka (Strimzi), Redis
+  - Applications: Mainframe Mock (Python), Account Service (.NET)
+
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - argocd
+  - gitops
+  - app-of-apps
+  - openshift
+
+maintainers:
+  - name: Mizrahi Bank DevOps Team
+    email: devops@mizrahi.bank
+
+home: https://github.com/amir1824/bank-gitops

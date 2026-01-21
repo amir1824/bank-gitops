@@ -1,0 +1,82 @@
+---
+# Mizrahi Bank - Root Application (App of Apps)
+# This is the ONLY file you need to apply manually to bootstrap the entire GitOps system.
+#
+# Usage:
+#   oc apply -f bootstrap/root-app.yaml
+#
+# This creates an ArgoCD Application that points to the apps-chart Helm Chart,
+# which in turn generates all other Application manifests for infrastructure and apps.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mizrahi-root
+  namespace: argocd
+  labels:
+    app: mizrahi-root
+    pattern: app-of-apps
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # The App of Apps pattern project
+  project: default
+  
+  # Source: Points to the Helm Chart that generates all Application CRDs
+  source:
+    repoURL: https://github.com/amir1824/bank-gitops.git
+    targetRevision: main
+    path: apps-chart
+    helm:
+      releaseName: mizrahi-apps
+      # Override values for environment-specific deployments
+      values: |
+        # Global configuration
+        global:
+          environment: dev
+          domain: apps.ocp.mizrahi.local
+          
+        # Infrastructure toggles
+        infrastructure:
+          kafka:
+            enabled: true
+          redis:
+            enabled: true
+        
+        # Application toggles  
+        applications:
+          mainframeMock:
+            enabled: true
+          accountService:
+            enabled: true
+  
+  # Destination: Where the Application objects will be created
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  
+  # Sync policy: Automated deployment with pruning
+  syncPolicy:
+    automated:
+      prune: true       # Delete resources when removed from git
+      selfHeal: true    # Revert manual changes
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  # Ignore differences in Application status
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      jsonPointers:
+        - /status

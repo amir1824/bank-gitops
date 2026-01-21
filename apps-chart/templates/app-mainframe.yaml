@@ -1,0 +1,41 @@
+{{- if .Values.applications.mainframeMock.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-mainframe-mock
+  namespace: {{ .Values.global.argocdNamespace }}
+  labels:
+    {{- include "mizrahi-apps.labels" . | nindent 4 }}
+    component: application
+    service: mainframe-mock
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.applications.mainframeMock.syncWave }}"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: {{ .Values.global.repoURL }}
+    targetRevision: {{ .Values.global.targetRevision }}
+    path: {{ .Values.applications.mainframeMock.path }}
+    helm:
+      releaseName: {{ .Values.applications.mainframeMock.helm.releaseName }}
+      values: |
+        {{- toYaml .Values.applications.mainframeMock.helm.values | nindent 8 }}
+  
+  destination:
+    server: {{ .Values.global.destinationServer }}
+    namespace: {{ .Values.applications.mainframeMock.namespace | default .Values.global.namespace }}
+  
+  syncPolicy:
+    {{- include "mizrahi-apps.syncPolicy" . | nindent 4 }}
+  
+  # OpenShift Route ignore rules
+  ignoreDifferences:
+    - group: route.openshift.io
+      kind: Route
+      jsonPointers:
+        - /status/ingress
+{{- end }}
