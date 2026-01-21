@@ -12,7 +12,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: bank-root-app
-  namespace: argocd
+  namespace: openshift-gitops
   labels:
     app: bank-root-app
     pattern: app-of-apps

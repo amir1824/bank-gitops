@@ -13,7 +13,7 @@ global:
   targetRevision: main
   
   # ArgoCD configuration
-  argocdNamespace: argocd
+  argocdNamespace: openshift-gitops
   destinationServer: https://kubernetes.default.svc
   
   # Target namespace for all workloads
